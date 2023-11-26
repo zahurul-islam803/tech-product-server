@@ -203,34 +203,34 @@ async function run() {
     //   res.send(result);
     // });
 
-    // // get all users
-    // app.get("/users", verifyToken, verifyAdmin, async (req, res) => {
-    //   const result = await usersCollection.find().toArray();
-    //   res.send(result);
-    // });
+    // get all users
+    app.get("/users", verifyToken, verifyAdmin, async (req, res) => {
+      const result = await usersCollection.find().toArray();
+      res.send(result);
+    });
 
-    // // update users role
-    // app.put("/users/update/:email", verifyToken, async (req, res) => {
-    //   const email = req.params.email;
-    //   const user = req.body;
-    //   const query = { email: email };
-    //   const options = { upsert: true };
-    //   const updateDoc = {
-    //     $set: {
-    //       ...user,
-    //       timestamp: Date.now(),
-    //     },
-    //   };
-    //   const result = await usersCollection.updateOne(query, updateDoc, options);
-    //   res.send(result);
-    // });
+    // update users role
+    app.put("/users/update/:email", verifyToken, async (req, res) => {
+      const email = req.params.email;
+      const user = req.body;
+      const query = { email: email };
+      const options = { upsert: true };
+      const updateDoc = {
+        $set: {
+          ...user,
+          timestamp: Date.now(),
+        },
+      };
+      const result = await usersCollection.updateOne(query, updateDoc, options);
+      res.send(result);
+    });
 
-    // // get role
-    // app.get("/users/:email", async (req, res) => {
-    //   const email = req.params.email;
-    //   const result = await usersCollection.findOne({ email });
-    //   res.send(result);
-    // });
+    // get role
+    app.get("/users/:email", async (req, res) => {
+      const email = req.params.email;
+      const result = await usersCollection.findOne({ email });
+      res.send(result);
+    });
 
     // // get rooms for host
     // app.get("/rooms/:email", verifyToken, verifyHost, async (req, res) => {

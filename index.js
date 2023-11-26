@@ -45,116 +45,90 @@ const client = new MongoClient(process.env.DB_URI, {
 });
 async function run() {
   try {
-    // const usersCollection = client.db("stayVistaDb").collection("users");
-    // const roomsCollection = client.db("stayVistaDb").collection("rooms");
-    // const bookingsCollection = client.db("stayVistaDb").collection("bookings");
+    const usersCollection = client.db("techHavenDb").collection("users");
 
-    // // role verification middleware
-    // // for admin
-    // const verifyAdmin = async (req, res, next) => {
-    //   const user = req.user;
-    //   const query = { email: user?.email };
-    //   const result = await usersCollection.findOne(query);
-    //   if (!result || result?.role !== "admin")
-    //     return res.status(401).send({ message: "unauthorized access!" });
-    //   next();
-    // };
+    // role verification middleware
+    // for admin
+    const verifyAdmin = async (req, res, next) => {
+      const user = req.user;
+      const query = { email: user?.email };
+      const result = await usersCollection.findOne(query);
+      if (!result || result?.role !== "admin")
+        return res.status(401).send({ message: "unauthorized access!" });
+      next();
+    };
 
-    // // for host
-    // const verifyHost = async (req, res, next) => {
-    //   const user = req.user;
-    //   const query = { email: user?.email };
-    //   const result = await usersCollection.findOne(query);
-    //   if (!result || result?.role !== "host")
-    //     return res.status(401).send({ message: "unauthorized access!" });
-    //   next();
-    // };
+    // for host
+    const verifyHost = async (req, res, next) => {
+      const user = req.user;
+      const query = { email: user?.email };
+      const result = await usersCollection.findOne(query);
+      if (!result || result?.role !== "host")
+        return res.status(401).send({ message: "unauthorized access!" });
+      next();
+    };
 
-    // // auth related api
-    // app.post("/jwt", async (req, res) => {
-    //   const user = req.body;
-    //   console.log("I need a new jwt", user);
-    //   const token = jwt.sign(user, process.env.ACCESS_TOKEN_SECRET, {
-    //     expiresIn: "365d",
-    //   });
-    //   res
-    //     .cookie("token", token, {
-    //       httpOnly: true,
-    //       secure: process.env.NODE_ENV === "production",
-    //       sameSite: process.env.NODE_ENV === "production" ? "none" : "strict",
-    //     })
-    //     .send({ success: true });
-    // });
+    // auth related api
+    app.post("/jwt", async (req, res) => {
+      const user = req.body;
+      const token = jwt.sign(user, process.env.ACCESS_TOKEN_SECRET, {
+        expiresIn: "365d",
+      });
+      res
+        .cookie("token", token, {
+          httpOnly: true,
+          secure: process.env.NODE_ENV === "production",
+          sameSite: process.env.NODE_ENV === "production" ? "none" : "strict",
+        })
+        .send({ success: true });
+    });
 
-    // // send email
-    // const sendEmail = () => {
-    //   // create transporter
-    //   const transporter = nodemailer.createTransport({
-    //     service: "gmail",
-    //     host: "smtp.gmail.com",
-    //     port: 587,
-    //     secure: false,
-    //     auth: {
-    //       user: process.env.USER,
-    //       pass: process.env.PASS,
-    //     },
-    //   });
-    //   // verify transporter
-    //   transporter.verify((error, success) => {
-    //     if (error) {
-    //       console.log(error);
-    //     } else {
-    //       console.log("service is ready to mails", success);
-    //     }
-    //   });
-    // };
+    // Logout
+    app.get("/logout", async (req, res) => {
+      try {
+        res
+          .clearCookie("token", {
+            maxAge: 0,
+            secure: process.env.NODE_ENV === "production",
+            sameSite: process.env.NODE_ENV === "production" ? "none" : "strict",
+          })
+          .send({ success: true });
+        console.log("Logout successful");
+      } catch (err) {
+        res.status(500).send(err);
+      }
+    });
 
-    // // Logout
-    // app.get("/logout", async (req, res) => {
-    //   try {
-    //     res
-    //       .clearCookie("token", {
-    //         maxAge: 0,
-    //         secure: process.env.NODE_ENV === "production",
-    //         sameSite: process.env.NODE_ENV === "production" ? "none" : "strict",
-    //       })
-    //       .send({ success: true });
-    //     console.log("Logout successful");
-    //   } catch (err) {
-    //     res.status(500).send(err);
-    //   }
-    // });
-
-    // // Save or modify user email, status in DB
-    // app.put("/users/:email", async (req, res) => {
-    //   const email = req.params.email;
-    //   const user = req.body;
-    //   const query = { email: email };
-    //   const options = { upsert: true };
-    //   const isExist = await usersCollection.findOne(query);
-    //   if (isExist) {
-    //     if (user?.status === "Requested") {
-    //       const result = await usersCollection.updateOne(
-    //         query,
-    //         {
-    //           $set: user,
-    //         },
-    //         options
-    //       );
-    //       return res.send(result);
-    //     } else {
-    //       return res.send(isExist);
-    //     }
-    //   }
-    //   const result = await usersCollection.updateOne(
-    //     query,
-    //     {
-    //       $set: { ...user, timestamp: Date.now() },
-    //     },
-    //     options
-    //   );
-    //   res.send(result);
-    // });
+    // Save or modify user email, status in Database
+    app.put("/users/:email", async (req, res) => {
+      const email = req.params.email;
+      const user = req.body;
+      const query = { email: email };
+      const options = { upsert: true };
+      const isExist = await usersCollection.findOne(query);
+      if (isExist) {
+        if (user?.status === "Requested") {
+          const result = await usersCollection.updateOne(
+            query,
+            {
+              $set: user,
+            },
+            options
+          );
+          return res.send(result);
+        } else {
+          return res.send(isExist);
+        }
+      }
+      const result = await usersCollection.updateOne(
+        query,
+        {
+          $set: { ...user, timestamp: Date.now() },
+        },
+        options
+      );
+      res.send(result);
+    });
 
     // // get all rooms data
     // app.get("/rooms", async (req, res) => {

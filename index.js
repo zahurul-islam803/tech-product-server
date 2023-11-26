@@ -46,6 +46,9 @@ const client = new MongoClient(process.env.DB_URI, {
 async function run() {
   try {
     const usersCollection = client.db("techHavenDb").collection("users");
+    const subscriptionCollection = client
+      .db("techHavenDb")
+      .collection("subscriptions");
 
     // role verification middleware
     // for admin
@@ -58,12 +61,12 @@ async function run() {
       next();
     };
 
-    // for host
-    const verifyHost = async (req, res, next) => {
+    // for moderator
+    const verifyModerator = async (req, res, next) => {
       const user = req.user;
       const query = { email: user?.email };
       const result = await usersCollection.findOne(query);
-      if (!result || result?.role !== "host")
+      if (!result || result?.role !== "moderator")
         return res.status(401).send({ message: "unauthorized access!" });
       next();
     };
@@ -150,58 +153,36 @@ async function run() {
     //   res.send(result);
     // });
 
-    // // generate client secret for payment intent
-    // app.post("/create-payment-intent", verifyToken, async (req, res) => {
-    //   const { price } = req.body;
-    //   const amount = parseInt(price * 100);
-    //   if (!price || amount < 1) return;
-    //   const { client_secret } = await stripe.paymentIntents.create({
-    //     amount: amount,
-    //     currency: "usd",
-    //     payment_method_types: ["card"],
-    //   });
-    //   res.send({ clientSecret: client_secret });
-    // });
+    // generate client secret for payment intent
+    app.post("/create-payment-intent", verifyToken, async (req, res) => {
+      const { price } = req.body;
+      const amount = parseInt(price * 100);
+      if (!price || amount < 1) return;
+      const { client_secret } = await stripe.paymentIntents.create({
+        amount: amount,
+        currency: "usd",
+        payment_method_types: ["card"],
+      });
+      res.send({ clientSecret: client_secret });
+    });
 
-    // // save booking info in bookingCollection
-    // app.post("/bookings", verifyToken, async (req, res) => {
-    //   const booking = req.body;
-    //   const result = await bookingsCollection.insertOne(booking);
-    //   // send email
-    //   res.send(result);
-    // });
+    // save subscription info in subscriptionCollection
+    app.post("/subscription", verifyToken, async (req, res) => {
+      const subscription = req.body;
+      const result = await subscriptionCollection.insertOne(subscription);
+      // send email
+      res.send(result);
+    });
 
-    // // update room booking status
-    // app.patch("/rooms/status/:id", async (req, res) => {
-    //   const id = req.params.id;
-    //   const status = req.body.status;
-    //   const query = { _id: new ObjectId(id) };
-    //   const updateDock = {
-    //     $set: {
-    //       booked: status,
-    //     },
-    //   };
-    //   const result = await roomsCollection.updateOne(query, updateDock);
-    //   res.send(result);
-    // });
 
-    // // get booking collection for guest
-    // app.get("/bookings", verifyToken, async (req, res) => {
-    //   const email = req.query.email;
-    //   if (!email) return res.send([]);
-    //   const query = { "guest.email": email };
-    //   const result = await bookingsCollection.find(query).toArray();
-    //   res.send(result);
-    // });
-
-    // // get booking collection for host
-    // app.get("/bookings/host", verifyToken, verifyHost, async (req, res) => {
-    //   const email = req.query.email;
-    //   if (!email) return res.send([]);
-    //   const query = { host: email };
-    //   const result = await bookingsCollection.find(query).toArray();
-    //   res.send(result);
-    // });
+    // get subscription collection for guest
+    app.get("/subscriptions", verifyToken, async (req, res) => {
+      const email = req.query.email;
+      if (!email) return res.send([]);
+      const query = { "guest.email": email };
+      const result = await subscriptionCollection.find(query).toArray();
+      res.send(result);
+    });
 
     // get all users
     app.get("/users", verifyToken, verifyAdmin, async (req, res) => {

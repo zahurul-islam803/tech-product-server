@@ -47,8 +47,9 @@ async function run() {
   try {
     const usersCollection = client.db("techHavenDb").collection("users");
     const subscriptionCollection = client
-      .db("techHavenDb")
-      .collection("subscriptions");
+    .db("techHavenDb")
+    .collection("subscriptions");
+    const productsCollection = client.db("techHavenDb").collection("products");
 
     // role verification middleware
     // for admin
@@ -146,12 +147,12 @@ async function run() {
     //   res.send(result);
     // });
 
-    // //save room in the database
-    // app.post("/rooms", verifyToken, async (req, res) => {
-    //   const room = req.body;
-    //   const result = await roomsCollection.insertOne(room);
-    //   res.send(result);
-    // });
+    //save product in the database
+    app.post("/products", verifyToken, async (req, res) => {
+      const product = req.body;
+      const result = await productsCollection.insertOne(product);
+      res.send(result);
+    });
 
     // generate client secret for payment intent
     app.post("/create-payment-intent", verifyToken, async (req, res) => {

@@ -134,11 +134,26 @@ async function run() {
       res.send(result);
     });
 
-    // // get all rooms data
-    // app.get("/rooms", async (req, res) => {
-    //   const result = await roomsCollection.find().toArray();
-    //   res.send(result);
-    // });
+    // get product data depend on categories
+    app.get("/products", verifyToken, async (req, res) => {
+      let queryObj = {};
+      let sortObj = {};
+      const category = req.query.category;
+      const sortField = req.query.sortField;
+      const sortOrder = req.query.sortOrder;
+      const page = Number(req.query.page);
+      const limit = Number(req.query.limit);
+      const skip = (page-1)*limit;
+      if(category){
+        queryObj.category = category;
+      }
+      if(sortField && sortOrder){
+        sortObj[sortField] = sortOrder;
+      }
+      const result = await productsCollection.find(queryObj).skip(skip).limit(limit).sort(sortObj).toArray();
+      const total = await productsCollection.countDocuments()
+      res.send({total, result});
+    });
 
     // // get single room data
     // app.get("/room/:id", async (req, res) => {

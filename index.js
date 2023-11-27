@@ -174,7 +174,6 @@ async function run() {
       res.send(result);
     });
 
-
     // get subscription collection for guest
     app.get("/subscriptions", verifyToken, async (req, res) => {
       const email = req.query.email;

@@ -135,7 +135,7 @@ async function run() {
     });
 
     // get product data depend on categories
-    app.get("/products", verifyToken, async (req, res) => {
+    app.get("/products",verifyToken, async (req, res) => {
       let queryObj = {};
       let sortObj = {};
       const category = req.query.category;
@@ -155,12 +155,12 @@ async function run() {
       res.send({total, result});
     });
 
-    // // get single room data
-    // app.get("/room/:id", async (req, res) => {
-    //   const id = req.params.id;
-    //   const result = await roomsCollection.findOne({ _id: new ObjectId(id) });
-    //   res.send(result);
-    // });
+    // get single product data
+    app.get("/product/:id", async (req, res) => {
+      const id = req.params.id;
+      const result = await productsCollection.findOne({ _id: new ObjectId(id) });
+      res.send(result);
+    });
 
     //save product in the database
     app.post("/products", verifyToken, async (req, res) => {
@@ -228,15 +228,6 @@ async function run() {
       res.send(result);
     });
 
-    // // get rooms for host
-    // app.get("/rooms/:email", verifyToken, verifyHost, async (req, res) => {
-    //   const email = req.params.email;
-    //   const result = await roomsCollection
-    //     .find({ "host.email": email })
-    //     .toArray();
-    //   res.send(result);
-    // });
-
     // Send a ping to confirm a successful connection
     await client.db("admin").command({ ping: 1 });
     console.log(
@@ -250,9 +241,9 @@ async function run() {
 run().catch(console.dir);
 
 app.get("/", (req, res) => {
-  res.send("Hello from StayVista Server..");
+  res.send("Hello from TechHaven Server..");
 });
 
 app.listen(port, () => {
-  console.log(`StayVista is running on port ${port}`);
+  console.log(`TechHaven is running on port ${port}`);
 });

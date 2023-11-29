@@ -184,6 +184,12 @@ async function run() {
       res.send(result);
     });
 
+    // get product review data
+    app.get("/reviews", verifyToken, async (req, res) => {
+      const result = await reviewsCollection.find().toArray();
+      res.send(result);
+    });
+
     // delete products
     app.delete("/products/:id", async (req, res) => {
       const id = req.params.id;

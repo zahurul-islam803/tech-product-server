@@ -176,6 +176,14 @@ async function run() {
       res.send(result);
     });
 
+    // delete products
+    app.delete("/products/:id", async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: new ObjectId(id) };
+      const result = await productsCollection.deleteOne(query);
+      res.send(result);
+    });
+
     // generate client secret for payment intent
     app.post("/create-payment-intent", verifyToken, async (req, res) => {
       const { price } = req.body;

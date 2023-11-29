@@ -47,8 +47,8 @@ async function run() {
   try {
     const usersCollection = client.db("techHavenDb").collection("users");
     const subscriptionCollection = client
-    .db("techHavenDb")
-    .collection("subscriptions");
+      .db("techHavenDb")
+      .collection("subscriptions");
     const productsCollection = client.db("techHavenDb").collection("products");
 
     // role verification middleware
@@ -135,7 +135,7 @@ async function run() {
     });
 
     // get product data depend on categories
-    app.get("/products",verifyToken, async (req, res) => {
+    app.get("/products", verifyToken, async (req, res) => {
       let queryObj = {};
       let sortObj = {};
       const category = req.query.category;
@@ -143,22 +143,29 @@ async function run() {
       const sortOrder = req.query.sortOrder;
       const page = Number(req.query.page);
       const limit = Number(req.query.limit);
-      const skip = (page-1)*limit;
-      if(category){
+      const skip = (page - 1) * limit;
+      if (category) {
         queryObj.category = category;
       }
-      if(sortField && sortOrder){
+      if (sortField && sortOrder) {
         sortObj[sortField] = sortOrder;
       }
-      const result = await productsCollection.find(queryObj).skip(skip).limit(limit).sort(sortObj).toArray();
-      const total = await productsCollection.countDocuments()
-      res.send({total, result});
+      const result = await productsCollection
+        .find(queryObj)
+        .skip(skip)
+        .limit(limit)
+        .sort(sortObj)
+        .toArray();
+      const total = await productsCollection.countDocuments();
+      res.send({ total, result });
     });
 
     // get single product data
     app.get("/product/:id", async (req, res) => {
       const id = req.params.id;
-      const result = await productsCollection.findOne({ _id: new ObjectId(id) });
+      const result = await productsCollection.findOne({
+        _id: new ObjectId(id),
+      });
       res.send(result);
     });
 
@@ -205,6 +212,13 @@ async function run() {
       res.send(result);
     });
 
+    // get role
+    app.get("/users/:email", async (req, res) => {
+      const email = req.params.email;
+      const result = await usersCollection.findOne({ email });
+      res.send(result);
+    });
+
     // update users role
     app.put("/users/update/:email", verifyToken, async (req, res) => {
       const email = req.params.email;
@@ -218,13 +232,6 @@ async function run() {
         },
       };
       const result = await usersCollection.updateOne(query, updateDoc, options);
-      res.send(result);
-    });
-
-    // get role
-    app.get("/users/:email", async (req, res) => {
-      const email = req.params.email;
-      const result = await usersCollection.findOne({ email });
       res.send(result);
     });
 

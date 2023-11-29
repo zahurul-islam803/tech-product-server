@@ -50,6 +50,7 @@ async function run() {
       .db("techHavenDb")
       .collection("subscriptions");
     const productsCollection = client.db("techHavenDb").collection("products");
+    const reviewsCollection = client.db("techHavenDb").collection("reviews");
 
     // role verification middleware
     // for admin
@@ -176,6 +177,13 @@ async function run() {
       res.send(result);
     });
 
+    //save review for product in the database
+    app.post("/reviews", verifyToken, async (req, res) => {
+      const review = req.body;
+      const result = await reviewsCollection.insertOne(review);
+      res.send(result);
+    });
+
     // delete products
     app.delete("/products/:id", async (req, res) => {
       const id = req.params.id;
@@ -262,3 +270,4 @@ app.get("/", (req, res) => {
 app.listen(port, () => {
   console.log(`TechHaven is running on port ${port}`);
 });
+

@@ -257,6 +257,14 @@ async function run() {
       res.send(result);
     });
 
+    // chart analytics
+    // app.get('/admin-stats', verifyToken,  async (req, res,) => {
+    //   const users = await usersCollection.estimatedDocumentCount();
+    //   const products = await productsCollection.estimatedDocumentCount();
+    //   const reviews = await reviewsCollection.estimatedDocumentCount();
+    //   res.send({users, products, reviews});
+    // })
+
     // Send a ping to confirm a successful connection
     await client.db("admin").command({ ping: 1 });
     console.log(
